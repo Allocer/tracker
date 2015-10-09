@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.io.StringWriter;
-import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -31,10 +30,18 @@ public class MailServiceImpl implements MailService
     @Override
     public void sendMessage( final ParcelDto parcelDto, final MailTemplateEnum mailType ) throws MessagingException
     {
-        MailTemplate mailTemplate = mailTemplateDao.findByType( mailType );
+        createSendMessage( parcelDto, mailType, null );
+    }
 
-        Map< String, String > parameters = new HashMap<>();
-        parameters.put( "username", "Gniewko" );
+    @Override
+    public void sendMessage( final ParcelDto parcelDto, final MailTemplateEnum mailType, final Map< String, String > parameters ) throws MessagingException
+    {
+        createSendMessage( parcelDto, mailType, parameters );
+    }
+
+    private void createSendMessage( final ParcelDto parcelDto, final MailTemplateEnum mailType, final Map< String, String > parameters ) throws MessagingException
+    {
+        MailTemplate mailTemplate = mailTemplateDao.findByType( mailType );
         MimeMessage message = createMessage( mailTemplate, parcelDto, parameters );
 
         sendMessage( message );
@@ -51,9 +58,12 @@ public class MailServiceImpl implements MailService
         helper.setTo( parcelDto.getRecipient().getEmail() );
 
         VelocityContext context = new VelocityContext();
-        for ( final Map.Entry< String, String > entry : parametrs.entrySet() )
+        if ( parametrs != null )
         {
-            context.put( entry.getKey(), entry.getValue() );
+            for ( final Map.Entry< String, String > entry : parametrs.entrySet() )
+            {
+                context.put( entry.getKey(), entry.getValue() );
+            }
         }
         StringWriter writer = new StringWriter();
         Velocity.evaluate( context, writer, "Email", mailBody );
@@ -65,13 +75,5 @@ public class MailServiceImpl implements MailService
     private void sendMessage( final MimeMessage message )
     {
         mailSender.send( message );
-    }
-
-    private Map< String, String > setParameters( final String key, final String value )
-    {
-        Map< String, String > parameters = new HashMap<>();
-        parameters.put( key, value );
-
-        return parameters;
     }
 }
