@@ -19,33 +19,33 @@ import java.util.Properties;
 public class DatabaseConfig
 {
     @Autowired
-    private Environment _env;
+    private Environment environment;
 
     @Autowired
-    private DataSource _dataSource;
+    private DataSource dataSource;
 
     @Autowired
-    private LocalContainerEntityManagerFactoryBean _entityManagerFactory;
+    private LocalContainerEntityManagerFactoryBean entityManagerFactory;
 
     /**
      * Method dataSource
-     * <p/>
+     * <p>
      * DataSource definition for database connection.
      */
     @Bean
     public DataSource dataSource()
     {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName(_env.getProperty("db.driver"));
-        dataSource.setUrl(_env.getProperty("db.url"));
-        dataSource.setUsername(_env.getProperty("db.username"));
-        dataSource.setPassword(_env.getProperty("db.password"));
+        dataSource.setDriverClassName( environment.getProperty( "db.driver" ) );
+        dataSource.setUrl( environment.getProperty( "db.url" ) );
+        dataSource.setUsername( environment.getProperty( "db.username" ) );
+        dataSource.setPassword( environment.getProperty( "db.password" ) );
         return dataSource;
     }
 
     /**
      * Method entityManagerFactory
-     * <p/>
+     * <p>
      * Declare the JPA entity manager factory.
      */
     @Bean
@@ -54,35 +54,35 @@ public class DatabaseConfig
         LocalContainerEntityManagerFactoryBean entityManagerFactory =
                 new LocalContainerEntityManagerFactoryBean();
 
-        entityManagerFactory.setDataSource(_dataSource);
+        entityManagerFactory.setDataSource( dataSource );
 
         // Classpath scanning of @Component, @Service, etc annotated class
         entityManagerFactory.setPackagesToScan(
-                _env.getProperty("entitymanager.packagesToScan"));
+                environment.getProperty( "entitymanager.packagesToScan" ) );
 
         // Vendor adapter
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
-        entityManagerFactory.setJpaVendorAdapter(vendorAdapter);
+        entityManagerFactory.setJpaVendorAdapter( vendorAdapter );
 
         // Hibernate properties
         Properties additionalProperties = new Properties();
         additionalProperties.put(
                 "hibernate.dialect",
-                _env.getProperty("hibernate.dialect"));
+                environment.getProperty( "hibernate.dialect" ) );
         additionalProperties.put(
                 "hibernate.show_sql",
-                _env.getProperty("hibernate.show_sql"));
+                environment.getProperty( "hibernate.show_sql" ) );
         additionalProperties.put(
                 "hibernate.hbm2ddl.auto",
-                _env.getProperty("hibernate.hbm2ddl.auto"));
-        entityManagerFactory.setJpaProperties(additionalProperties);
+                environment.getProperty( "hibernate.hbm2ddl.auto" ) );
+        entityManagerFactory.setJpaProperties( additionalProperties );
 
         return entityManagerFactory;
     }
 
     /**
      * Method transactionManager
-     * <p/>
+     * <p>
      * Declare the transaction manager.
      */
     @Bean
@@ -91,13 +91,13 @@ public class DatabaseConfig
         JpaTransactionManager transactionManager =
                 new JpaTransactionManager();
         transactionManager.setEntityManagerFactory(
-                _entityManagerFactory.getObject());
+                entityManagerFactory.getObject() );
         return transactionManager;
     }
 
     /**
      * Method persistenceExceptionTranslationPostProcessor
-     * <p/>
+     * <p>
      * PersistenceExceptionTranslationPostProcessor is a bean post processor
      * which adds an advisor to any bean that's annotated with \@Repository so
      * that any platform-specific exceptions are caught and then rethrown as one

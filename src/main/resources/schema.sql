@@ -1,0 +1,1 @@
+INSERT INTO MailTemplate(id, mailType, content, subject) VALUES(1, 'PARCEL_NEW', '<div><hr />Hello user <b>${username}</b></div>', 'Paczka zostala przyjeta');
