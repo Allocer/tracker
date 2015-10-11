@@ -4,6 +4,7 @@ import app.tracker.enums.ParcelStatus;
 import app.tracker.enums.ParcelType;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -15,13 +16,14 @@ public class Parcel implements Serializable
     @Column
     private Long id;
 
-    @OneToOne( mappedBy = "parcel", cascade = CascadeType.ALL )
+    @OneToOne( mappedBy = "parcelSender", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Place sender;
 
-    @OneToOne( mappedBy = "parcel", cascade = CascadeType.ALL )
+    @OneToOne( mappedBy = "parcelRecipient", cascade = CascadeType.ALL, fetch = FetchType.EAGER )
     private Place recipient;
 
-    @Column( length = 26 )
+    @Column( length = 25 )
+    @NotNull
     private String number;
 
     @Column
@@ -29,6 +31,7 @@ public class Parcel implements Serializable
     private ParcelType type;
 
     @Column
+    @NotNull
     @Enumerated( EnumType.STRING )
     private ParcelStatus status;
 

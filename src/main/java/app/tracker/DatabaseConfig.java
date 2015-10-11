@@ -27,11 +27,6 @@ public class DatabaseConfig
     @Autowired
     private LocalContainerEntityManagerFactoryBean entityManagerFactory;
 
-    /**
-     * Method dataSource
-     * <p>
-     * DataSource definition for database connection.
-     */
     @Bean
     public DataSource dataSource()
     {
@@ -40,14 +35,10 @@ public class DatabaseConfig
         dataSource.setUrl( environment.getProperty( "db.url" ) );
         dataSource.setUsername( environment.getProperty( "db.username" ) );
         dataSource.setPassword( environment.getProperty( "db.password" ) );
+
         return dataSource;
     }
 
-    /**
-     * Method entityManagerFactory
-     * <p>
-     * Declare the JPA entity manager factory.
-     */
     @Bean
     public LocalContainerEntityManagerFactoryBean entityManagerFactory()
     {
@@ -55,55 +46,33 @@ public class DatabaseConfig
                 new LocalContainerEntityManagerFactoryBean();
 
         entityManagerFactory.setDataSource( dataSource );
+        entityManagerFactory.setPackagesToScan( environment.getProperty( "entitymanager.packagesToScan" ) );
 
-        // Classpath scanning of @Component, @Service, etc annotated class
-        entityManagerFactory.setPackagesToScan(
-                environment.getProperty( "entitymanager.packagesToScan" ) );
-
-        // Vendor adapter
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         entityManagerFactory.setJpaVendorAdapter( vendorAdapter );
 
-        // Hibernate properties
         Properties additionalProperties = new Properties();
-        additionalProperties.put(
-                "hibernate.dialect",
-                environment.getProperty( "hibernate.dialect" ) );
-        additionalProperties.put(
-                "hibernate.show_sql",
-                environment.getProperty( "hibernate.show_sql" ) );
-        additionalProperties.put(
-                "hibernate.hbm2ddl.auto",
-                environment.getProperty( "hibernate.hbm2ddl.auto" ) );
+        additionalProperties.put( "hibernate.dialect", environment.getProperty( "hibernate.dialect" ) );
+        additionalProperties.put( "hibernate.show_sql", environment.getProperty( "hibernate.show_sql" ) );
+        additionalProperties.put( "hibernate.hbm2ddl.auto", environment.getProperty( "hibernate.hbm2ddl.auto" ) );
+        additionalProperties.put( "hibernate.connection.useUnicode", environment.getProperty( "hibernate.connection.useUnicode" ) );
+        additionalProperties.put( "hibernate.connection.characterEncoding", environment.getProperty( "hibernate.connection.characterEncoding" ) );
+        additionalProperties.put( "hibernate.connection.CharSet", environment.getProperty( "hibernate.connection.CharSet" ) );
+
         entityManagerFactory.setJpaProperties( additionalProperties );
 
         return entityManagerFactory;
     }
 
-    /**
-     * Method transactionManager
-     * <p>
-     * Declare the transaction manager.
-     */
     @Bean
     public JpaTransactionManager transactionManager()
     {
-        JpaTransactionManager transactionManager =
-                new JpaTransactionManager();
-        transactionManager.setEntityManagerFactory(
-                entityManagerFactory.getObject() );
+        JpaTransactionManager transactionManager = new JpaTransactionManager();
+        transactionManager.setEntityManagerFactory( entityManagerFactory.getObject() );
+
         return transactionManager;
     }
 
-    /**
-     * Method persistenceExceptionTranslationPostProcessor
-     * <p>
-     * PersistenceExceptionTranslationPostProcessor is a bean post processor
-     * which adds an advisor to any bean that's annotated with \@Repository so
-     * that any platform-specific exceptions are caught and then rethrown as one
-     * Spring's unchecked data access exceptions (i.e. a subclass of
-     * DataAccessException).
-     */
     @Bean
     public PersistenceExceptionTranslationPostProcessor exceptionTranslation()
     {

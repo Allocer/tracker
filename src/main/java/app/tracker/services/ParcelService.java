@@ -19,5 +19,7 @@ public interface ParcelService
 
     ParcelDto update( final ParcelDto parcelDto );
 
+    ParcelDto updateWithMail( final ParcelDto parcelDto ) throws MessagingException;
+
     void delete( final Long id );
 }

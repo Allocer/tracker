@@ -17,7 +17,7 @@ public class MailTemplate implements Serializable
     @Enumerated( EnumType.STRING )
     private MailTemplateEnum mailType;
 
-    @Column
+    @Column(length = 2500)
     private String content;
 
     @Column

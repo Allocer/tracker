@@ -6,13 +6,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import javax.mail.MessagingException;
 import javax.persistence.EntityNotFoundException;
 
 public abstract class AbstractController
 {
-    protected static final String JSON_MEDIA_TYPE = "application/json; ";
-    protected static final String JSON_UTF8 = JSON_MEDIA_TYPE + "charset=utf-8";
-
     @ExceptionHandler( EntityNotFoundException.class )
     @ResponseStatus( value = HttpStatus.NOT_FOUND )
     protected ErrorDto handleEntityNotFoundException( EntityNotFoundException ex )
@@ -44,6 +42,13 @@ public abstract class AbstractController
     @ExceptionHandler( NullPointerException.class )
     @ResponseStatus( value = HttpStatus.BAD_REQUEST )
     protected ErrorDto handleNullPointerException( NullPointerException ex )
+    {
+        return new ErrorDto( ex );
+    }
+
+    @ExceptionHandler( MessagingException.class )
+    @ResponseStatus( value = HttpStatus.INTERNAL_SERVER_ERROR )
+    protected ErrorDto handleMessagingException( MessagingException ex )
     {
         return new ErrorDto( ex );
     }

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ParcelNumberGenerator
 {
-    private static final int NUMBER_LENGTH = 25;
+    private static final int NUMBER_LENGTH = 24;
     private static final boolean WITH_LETTERS = false;
     private static final boolean WITH_NUMBERS = true;
 

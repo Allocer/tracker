@@ -38,6 +38,15 @@ public class ParcelServiceImpl implements ParcelService
     }
 
     @Override
+    public ParcelDto updateWithMail( final ParcelDto parcelDto ) throws MessagingException
+    {
+        ParcelDto updated = update( parcelDto );
+        mailService.sendMessage( updated, MailTemplateEnum.PARCEL_STATUS_CHANGED );
+
+        return updated;
+    }
+
+    @Override
     @Transactional
     public ParcelDto persist( final ParcelDto parcelDto )
     {
@@ -68,22 +77,22 @@ public class ParcelServiceImpl implements ParcelService
     public List< ParcelDto > findAll()
     {
         List< Parcel > parcels = parcelDao.findAll();
-        List< ParcelDto > dtos = new ArrayList<>();
+        List< ParcelDto > transformers = new ArrayList<>();
         for ( final Parcel parcel : parcels )
         {
             ParcelDto dto = parcelMigrator.copyEntity( parcel );
-            dtos.add( dto );
+            transformers.add( dto );
         }
 
-        return dtos;
+        return transformers;
     }
 
     @Override
     @Transactional
     public ParcelDto update( final ParcelDto parcelDto )
     {
-        Parcel parcel = parcelMigrator.copyDto( parcelDto );
-        parcel.setId( parcel.getId() );
+        Parcel parcel = parcelDao.findByNumber( parcelDto.getNumber() );
+        parcel.setStatus( parcelDto.getStatus() );
 
         return parcelMigrator.copyEntity( parcelDao.update( parcel ) );
     }

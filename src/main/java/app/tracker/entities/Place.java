@@ -3,6 +3,7 @@ package app.tracker.entities;
 import org.hibernate.validator.constraints.Email;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.List;
 
@@ -11,21 +12,28 @@ public class Place implements Serializable
 {
     @Id
     @GeneratedValue
-    @Column
+    @Column( name = "place_id" )
     private Long id;
 
     @Column
+    @NotNull
     private String name;
 
     @Column
     @Email
+    @NotNull
     private String email;
 
     @OneToMany( mappedBy = "place", cascade = CascadeType.ALL )
     private List< Address > addresses;
 
     @OneToOne
-    private Parcel parcel;
+    @PrimaryKeyJoinColumn
+    private Parcel parcelSender;
+
+    @OneToOne
+    @PrimaryKeyJoinColumn
+    private Parcel parcelRecipient;
 
     public Long getId()
     {
@@ -57,14 +65,24 @@ public class Place implements Serializable
         this.addresses = addresses;
     }
 
-    public Parcel getParcel()
+    public Parcel getParcelSender()
     {
-        return parcel;
+        return parcelSender;
     }
 
-    public void setParcel( Parcel parcel )
+    public void setParcelSender( Parcel parcelSender )
     {
-        this.parcel = parcel;
+        this.parcelSender = parcelSender;
+    }
+
+    public Parcel getParcelRecipient()
+    {
+        return parcelRecipient;
+    }
+
+    public void setParcelRecipient( Parcel parcelRecipient )
+    {
+        this.parcelRecipient = parcelRecipient;
     }
 
     public String getEmail()
