@@ -71,7 +71,7 @@ public class ParcelServiceImpl implements ParcelService
     {
         if ( number == null || number.isEmpty() )
         {
-            throw new IllegalArgumentException( "Parcel number is null or empty" );
+            throw new IllegalArgumentException( "Nie podano numeru przesyłki." );
         }
 
         Parcel parcel = parcelDao.findByNumber( number );
@@ -142,7 +142,7 @@ public class ParcelServiceImpl implements ParcelService
         int index = statuses.indexOf( parcel.getStatus() ) + 1;
         if ( index >= statuses.size() )
         {
-            throw new IndexOutOfBoundsException( "Przesyłka zostałą dostarczona. Nie można zmienić jej statusu." );
+            throw new IndexOutOfBoundsException( "Przesyłka została dostarczona. Nie można zmienić jej statusu." );
         }
         parcel.setStatus( statuses.get( index ) );
     }
