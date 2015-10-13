@@ -52,4 +52,11 @@ public abstract class AbstractController
     {
         return new ErrorDto( ex );
     }
+
+    @ExceptionHandler( IndexOutOfBoundsException.class )
+    @ResponseStatus( value = HttpStatus.BAD_REQUEST )
+    protected ErrorDto handleIndexOutOfBoundsException( IndexOutOfBoundsException ex )
+    {
+        return new ErrorDto( ex );
+    }
 }

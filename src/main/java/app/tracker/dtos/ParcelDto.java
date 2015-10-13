@@ -8,8 +8,9 @@ import java.util.Date;
 public class ParcelDto
 {
     private Long id;
-    private PlaceDto sender;
-    private PlaceDto recipient;
+    private SenderDto sender;
+    private RecipientDto recipient;
+    private AddressDto address;
     private String number;
     private ParcelType type;
     private ParcelStatus status;
@@ -28,24 +29,34 @@ public class ParcelDto
         this.id = id;
     }
 
-    public PlaceDto getSender()
+    public SenderDto getSender()
     {
         return sender;
     }
 
-    public void setSender( PlaceDto sender )
+    public void setSender( SenderDto sender )
     {
         this.sender = sender;
     }
 
-    public PlaceDto getRecipient()
+    public RecipientDto getRecipient()
     {
         return recipient;
     }
 
-    public void setRecipient( PlaceDto recipient )
+    public void setRecipient( RecipientDto recipient )
     {
         this.recipient = recipient;
+    }
+
+    public AddressDto getAddress()
+    {
+        return address;
+    }
+
+    public void setAddress( AddressDto address )
+    {
+        this.address = address;
     }
 
     public String getNumber()

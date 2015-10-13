@@ -16,13 +16,19 @@ public class Parcel implements Serializable
     @Column
     private Long id;
 
-    @OneToOne( mappedBy = "parcelSender", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private Place sender;
+    @OneToOne( mappedBy = "parcel", cascade = CascadeType.ALL )
+    private ParcelDetail detail;
 
-    @OneToOne( mappedBy = "parcelRecipient", cascade = CascadeType.ALL, fetch = FetchType.EAGER )
-    private Place recipient;
+    @OneToOne( mappedBy = "parcel", cascade = CascadeType.ALL )
+    private Sender sender;
 
-    @Column( length = 25 )
+    @OneToOne( mappedBy = "parcel", cascade = CascadeType.ALL )
+    private Recipient recipient;
+
+    @OneToOne( mappedBy = "parcel", cascade = CascadeType.ALL )
+    private Address address;
+
+    @Column( length = 26 )
     @NotNull
     private String number;
 
@@ -46,8 +52,6 @@ public class Parcel implements Serializable
     @Column
     private boolean isRegistered;
 
-    @OneToOne( mappedBy = "parcel", cascade = CascadeType.ALL )
-    private ParcelDetail detail;
 
     public Long getId()
     {
@@ -59,24 +63,34 @@ public class Parcel implements Serializable
         this.id = id;
     }
 
-    public Place getSender()
+    public Sender getSender()
     {
         return sender;
     }
 
-    public void setSender( Place sender )
+    public void setSender( Sender sender )
     {
         this.sender = sender;
     }
 
-    public Place getRecipient()
+    public Recipient getRecipient()
     {
         return recipient;
     }
 
-    public void setRecipient( Place recipient )
+    public void setRecipient( Recipient recipient )
     {
         this.recipient = recipient;
+    }
+
+    public Address getAddress()
+    {
+        return address;
+    }
+
+    public void setAddress( Address address )
+    {
+        this.address = address;
     }
 
     public String getNumber()

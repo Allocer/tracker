@@ -5,7 +5,8 @@ public enum MailTemplateEnum
     HEADER,
     FOOTER,
     PARCEL_NEW,
-    PARCEL_STATUS_CHANGED,
+    PARCEL_SEND,
+    PARCEL_IN_DELIVERY,
     PARCEL_CANCELLED,
     PARCEL_DELIVERED
 }

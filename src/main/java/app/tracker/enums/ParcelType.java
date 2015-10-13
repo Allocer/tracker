@@ -5,5 +5,7 @@ import java.io.Serializable;
 public enum ParcelType implements Serializable
 {
     LETTER,
-    PACKAGE
+    PACKAGE,
+    POST_OFFICE_BOX,
+    COURIER;
 }

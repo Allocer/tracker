@@ -26,9 +26,9 @@ public class Address implements Serializable
     @Column
     private String country;
 
-    @ManyToOne
-    @JoinColumn( name = "place_id" )
-    private Place place;
+    @OneToOne
+    @PrimaryKeyJoinColumn
+    private Parcel parcel;
 
     public Long getId()
     {
@@ -40,14 +40,14 @@ public class Address implements Serializable
         this.id = id;
     }
 
-    public Place getPlace()
+    public Parcel getParcel()
     {
-        return place;
+        return parcel;
     }
 
-    public void setPlace( Place place )
+    public void setParcel( Parcel parcel )
     {
-        this.place = place;
+        this.parcel = parcel;
     }
 
     public String getStreet()

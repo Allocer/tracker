@@ -4,7 +4,7 @@ import app.tracker.components.ParcelNumberGenerator;
 import app.tracker.daos.ParcelDao;
 import app.tracker.dtos.ParcelDto;
 import app.tracker.entities.Parcel;
-import app.tracker.enums.MailTemplateEnum;
+import app.tracker.enums.ParcelStatus;
 import app.tracker.migrators.ParcelMigrator;
 import app.tracker.services.MailService;
 import app.tracker.services.ParcelService;
@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.mail.MessagingException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -24,24 +26,22 @@ public class ParcelServiceImpl implements ParcelService
     @Autowired
     private ParcelMigrator parcelMigrator;
     @Autowired
-    private ParcelNumberGenerator numberGenerator;
-    @Autowired
     private MailService mailService;
 
     @Override
     public ParcelDto persistWithMail( final ParcelDto parcelDto ) throws MessagingException
     {
         ParcelDto created = persist( parcelDto );
-        mailService.sendMessage( created, MailTemplateEnum.PARCEL_NEW );
+        mailService.sendMessage( created );
 
         return created;
     }
 
     @Override
-    public ParcelDto updateWithMail( final ParcelDto parcelDto ) throws MessagingException
+    public ParcelDto updateStatusWithMail( final ParcelDto parcelDto ) throws MessagingException
     {
         ParcelDto updated = update( parcelDto );
-        mailService.sendMessage( updated, MailTemplateEnum.PARCEL_STATUS_CHANGED );
+        mailService.sendMessage( updated );
 
         return updated;
     }
@@ -52,6 +52,7 @@ public class ParcelServiceImpl implements ParcelService
     {
         Parcel parcel = parcelMigrator.copyDto( parcelDto );
         parcel.setNumber( generateNumber( parcel ) );
+        parcel.setStatus( ParcelStatus.NEW );
 
         return parcelMigrator.copyEntity( parcelDao.persist( parcel ) );
     }
@@ -68,6 +69,11 @@ public class ParcelServiceImpl implements ParcelService
     @Transactional
     public ParcelDto findByNumber( final String number )
     {
+        if ( number == null || number.isEmpty() )
+        {
+            throw new IllegalArgumentException( "Parcel number is null or empty" );
+        }
+
         Parcel parcel = parcelDao.findByNumber( number );
         return parcelMigrator.copyEntity( parcel );
     }
@@ -92,7 +98,12 @@ public class ParcelServiceImpl implements ParcelService
     public ParcelDto update( final ParcelDto parcelDto )
     {
         Parcel parcel = parcelDao.findByNumber( parcelDto.getNumber() );
-        parcel.setStatus( parcelDto.getStatus() );
+        if ( ParcelStatus.CANCELED.equals( parcel.getStatus() ) || ParcelStatus.RETURNED.equals( parcel.getStatus() ) )
+        {
+            throw new IllegalArgumentException( "Przesyłka anulowana lub zwrócona. Brak możliwości zmiany statusu." );
+        }
+        updateParcelStatus( parcel, parcelDto );
+        setParcelDate( parcel );
 
         return parcelMigrator.copyEntity( parcelDao.update( parcel ) );
     }
@@ -107,6 +118,44 @@ public class ParcelServiceImpl implements ParcelService
 
     private String generateNumber( final Parcel parcel )
     {
-        return numberGenerator.generateNumber( parcel.getType() );
+        return ParcelNumberGenerator.generateNumber( parcel.getType() );
+    }
+
+    private void updateParcelStatus( final Parcel parcel, final ParcelDto parcelDto )
+    {
+        if ( !ParcelStatus.CANCELED.equals( parcelDto.getStatus() ) && !ParcelStatus.RETURNED.equals( parcelDto.getStatus() ) )
+        {
+            updateParcelStatus( parcel );
+        }
+        else
+        {
+            parcel.setStatus( parcelDto.getStatus() );
+        }
+    }
+
+    private void updateParcelStatus( final Parcel parcel )
+    {
+        List< ParcelStatus > statuses = new ArrayList<>( Arrays.asList( ParcelStatus.values() ) );
+        statuses.remove( ParcelStatus.CANCELED );
+        statuses.remove( ParcelStatus.RETURNED );
+
+        int index = statuses.indexOf( parcel.getStatus() ) + 1;
+        if ( index >= statuses.size() )
+        {
+            throw new IndexOutOfBoundsException( "Przesyłka zostałą dostarczona. Nie można zmienić jej statusu." );
+        }
+        parcel.setStatus( statuses.get( index ) );
+    }
+
+    private void setParcelDate( final Parcel parcel )
+    {
+        if ( ParcelStatus.SEND.equals( parcel.getStatus() ) )
+        {
+            parcel.setSendDate( new Date() );
+        }
+        if ( ParcelStatus.DELIVERED.equals( parcel.getStatus() ) )
+        {
+            parcel.setReceiveDate( new Date() );
+        }
     }
 }

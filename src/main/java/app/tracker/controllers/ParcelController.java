@@ -21,12 +21,6 @@ public class ParcelController extends AbstractController
         return parcelService.persistWithMail( parcelDto );
     }
 
-    @RequestMapping( value = "/{id}", method = RequestMethod.GET )
-    public ParcelDto findParcelById( @PathVariable( "id" ) final Long id )
-    {
-        return parcelService.find( id );
-    }
-
     @RequestMapping( value = "/{number}", method = RequestMethod.GET )
     public ParcelDto findParcelByNumber( @PathVariable( "number" ) final String parcelNumber )
     {
@@ -34,9 +28,9 @@ public class ParcelController extends AbstractController
     }
 
     @RequestMapping( method = RequestMethod.PATCH )
-    public ParcelDto patchParcel( @RequestBody final ParcelDto parcelDto ) throws MessagingException
+    public ParcelDto patchParcelStatus( @RequestBody final ParcelDto parcelDto ) throws MessagingException
     {
-        return parcelService.update( parcelDto );
+        return parcelService.updateStatusWithMail( parcelDto );
     }
 
     @RequestMapping( value = "/{id}", method = RequestMethod.DELETE )

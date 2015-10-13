@@ -5,12 +5,12 @@ import java.io.Serializable;
 
 public enum ParcelStatus implements Serializable
 {
-    NEW( "Przyjeta w oddziale" ),
-    SEND( "Wyslana" ),
+    NEW( "Przyjęta w oddziale" ),
+    SEND( "Wysłana" ),
+    IN_DELIVERY( "W doręczeniu" ),
+    DELIVERED( "Odebrana" ),
     CANCELED( "Anulowana" ),
-    RETURNED( "Zwrocona" ),
-    DELIVERY( "W doreczeniu" ),
-    SORTING_PLANT( "W sortowni" );
+    RETURNED( "Zwrócona" );
 
     private String name;
 

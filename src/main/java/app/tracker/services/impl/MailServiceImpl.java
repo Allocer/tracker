@@ -4,6 +4,7 @@ import app.tracker.daos.MailTemplateDao;
 import app.tracker.dtos.ParcelDto;
 import app.tracker.entities.MailTemplate;
 import app.tracker.enums.MailTemplateEnum;
+import app.tracker.enums.ParcelStatus;
 import app.tracker.services.MailService;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
@@ -29,31 +30,57 @@ public class MailServiceImpl implements MailService
     private static final String MESSAGE_CONTENT_TYPE = "text/html; charset=UTF-8";
 
     @Override
-    public void sendMessage( final ParcelDto parcelDto, final MailTemplateEnum mailType ) throws MessagingException
+    public void sendMessage( final ParcelDto parcelDto ) throws MessagingException
     {
-        MailTemplate mailTemplate = mailTemplateDao.findByType( mailType );
-        Map< String, String > parameters = createParameters( mailType, parcelDto );
+        MailTemplate mailTemplate = findMailTemplate( parcelDto.getStatus() );
+        Map< String, String > parameters = createParameters( parcelDto );
         MimeMessage message = createMessage( mailTemplate, parcelDto, parameters );
 
         sendMessage( message );
     }
 
-    private Map< String, String > createParameters( final MailTemplateEnum template, final ParcelDto parcel )
+    private MailTemplate findMailTemplate( final ParcelStatus status )
+    {
+        switch ( status )
+        {
+            case NEW:
+                return mailTemplateDao.findByType( MailTemplateEnum.PARCEL_NEW );
+            case SEND:
+                return mailTemplateDao.findByType( MailTemplateEnum.PARCEL_SEND );
+            case IN_DELIVERY:
+                return mailTemplateDao.findByType( MailTemplateEnum.PARCEL_IN_DELIVERY );
+            case DELIVERED:
+                return mailTemplateDao.findByType( MailTemplateEnum.PARCEL_DELIVERED );
+            case CANCELED:
+                return mailTemplateDao.findByType( MailTemplateEnum.PARCEL_CANCELLED );
+            default:
+                return mailTemplateDao.findByType( MailTemplateEnum.PARCEL_NEW );
+        }
+    }
+
+    private Map< String, String > createParameters( final ParcelDto parcel )
     {
         Map< String, String > parameters = new HashMap<>();
-        switch ( template )
+        switch ( parcel.getStatus() )
         {
-            case PARCEL_NEW:
-                parameters.put( "parcelNumber", parcel.getNumber() );
-                parameters.put( "parcelSender", parcel.getSender().getName() );
-                parameters.put( "parcelRecipient", parcel.getRecipient().getName() );
-                parameters.put( "parcelStatus", parcel.getStatus().toString() );
+            case NEW:
+                setBasicParameters( parcel, parameters );
                 break;
-            case PARCEL_CANCELLED:
+            case SEND:
+                setBasicParameters( parcel, parameters );
+                parameters.put( "sendDate", parcel.getSendDate().toString() );
                 break;
-            case PARCEL_DELIVERED:
+            case IN_DELIVERY:
+                setBasicParameters( parcel, parameters );
+                parameters.put( "sendDate", parcel.getSendDate().toString() );
                 break;
-            case PARCEL_STATUS_CHANGED:
+            case DELIVERED:
+                setBasicParameters( parcel, parameters );
+                parameters.put( "sendDate", parcel.getSendDate().toString() );
+                parameters.put( "receiveDate", parcel.getReceiveDate().toString() );
+                break;
+            case CANCELED:
+                setBasicParameters( parcel, parameters );
                 break;
         }
 
@@ -98,6 +125,14 @@ public class MailServiceImpl implements MailService
         builder.append( mailFooter );
 
         return builder.toString();
+    }
+
+    private void setBasicParameters( final ParcelDto parcel, final Map< String, String > parameters )
+    {
+        parameters.put( "parcelNumber", parcel.getNumber() );
+        parameters.put( "parcelSender", parcel.getSender().getEmail() );
+        parameters.put( "parcelRecipient", parcel.getRecipient().getName() );
+        parameters.put( "parcelStatus", parcel.getStatus().toString() );
     }
 
     private void sendMessage( final MimeMessage message )
