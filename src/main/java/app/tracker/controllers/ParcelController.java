@@ -39,5 +39,4 @@ public class ParcelController extends AbstractController
     {
         parcelService.delete( id );
     }
-
 }
