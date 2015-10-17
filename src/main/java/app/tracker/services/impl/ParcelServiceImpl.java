@@ -73,8 +73,8 @@ public class ParcelServiceImpl implements ParcelService
         {
             throw new IllegalArgumentException( "Nie podano numeru przesyłki." );
         }
-
         Parcel parcel = parcelDao.findByNumber( number );
+
         return parcelMigrator.copyEntity( parcel );
     }
 
@@ -139,12 +139,12 @@ public class ParcelServiceImpl implements ParcelService
         statuses.remove( ParcelStatus.CANCELED );
         statuses.remove( ParcelStatus.RETURNED );
 
-        int index = statuses.indexOf( parcel.getStatus() ) + 1;
-        if ( index >= statuses.size() )
+        int nextStatus = statuses.indexOf( parcel.getStatus() ) + 1;
+        if ( nextStatus >= statuses.size() )
         {
             throw new IndexOutOfBoundsException( "Przesyłka została dostarczona. Nie można zmienić jej statusu." );
         }
-        parcel.setStatus( statuses.get( index ) );
+        parcel.setStatus( statuses.get( nextStatus ) );
     }
 
     private void setParcelDate( final Parcel parcel )

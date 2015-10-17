@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.io.StringWriter;
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -40,12 +41,55 @@ public class MailServiceImpl implements MailService
 
     private MailTemplate findMailTemplate( final ParcelStatus status )
     {
-        return status.findMailTemplate( mailTemplateDao );
+        switch ( status )
+        {
+            case NEW:
+                return mailTemplateDao.findByType( MailTemplateEnum.PARCEL_NEW );
+            case SEND:
+                return mailTemplateDao.findByType( MailTemplateEnum.PARCEL_SEND );
+            case IN_DELIVERY:
+                return mailTemplateDao.findByType( MailTemplateEnum.PARCEL_IN_DELIVERY );
+            case DELIVERED:
+                return mailTemplateDao.findByType( MailTemplateEnum.PARCEL_DELIVERED );
+            case CANCELED:
+                return mailTemplateDao.findByType( MailTemplateEnum.PARCEL_CANCELLED );
+            case RETURNED:
+                return mailTemplateDao.findByType( MailTemplateEnum.PARCEL_RETURNED );
+            default:
+                return mailTemplateDao.findByType( MailTemplateEnum.PARCEL_NEW );
+        }
     }
 
     private Map< String, String > createParameters( final MailTemplate mailTemplate, final ParcelDto parcel )
     {
-        return mailTemplate.getMailType().createMailParameters( parcel );
+        Map< String, String > parameters = new HashMap<>();
+        switch ( mailTemplate.getMailType() )
+        {
+            case PARCEL_NEW:
+                setBasicParameters( parcel, parameters );
+                break;
+            case PARCEL_SEND:
+                setBasicParameters( parcel, parameters );
+                parameters.put( "sendDate", parcel.getSendDate().toString() );
+                break;
+            case PARCEL_IN_DELIVERY:
+                setBasicParameters( parcel, parameters );
+                parameters.put( "sendDate", parcel.getSendDate().toString() );
+                break;
+            case PARCEL_DELIVERED:
+                setBasicParameters( parcel, parameters );
+                parameters.put( "sendDate", parcel.getSendDate().toString() );
+                parameters.put( "receiveDate", parcel.getReceiveDate().toString() );
+                break;
+            case PARCEL_CANCELLED:
+                setBasicParameters( parcel, parameters );
+                break;
+            case PARCEL_RETURNED:
+                setBasicParameters( parcel, parameters );
+                break;
+        }
+
+        return parameters;
     }
 
     private MimeMessage createMessage( final MailTemplate mailTemplate, final ParcelDto parcelDto, final Map< String, String > parameters ) throws MessagingException
@@ -86,6 +130,14 @@ public class MailServiceImpl implements MailService
         builder.append( mailFooter );
 
         return builder.toString();
+    }
+
+    void setBasicParameters( final ParcelDto parcel, final Map< String, String > parameters )
+    {
+        parameters.put( "parcelNumber", parcel.getNumber() );
+        parameters.put( "parcelSender", parcel.getSender().getEmail() );
+        parameters.put( "parcelRecipient", parcel.getRecipient().getName() );
+        parameters.put( "parcelStatus", parcel.getStatus().toString() );
     }
 
     private void sendMessage( final MimeMessage message )
